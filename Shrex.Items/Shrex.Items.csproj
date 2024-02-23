@@ -5,12 +5,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Title>Shrex.Filters</Title>
+    <Title>Shrex.Items</Title>
     <Authors>Lukáš Macek</Authors>
     <Description>It stands for SHaRepoint EXtensions... obviously</Description>
     <PackageIcon>shrex-logo.png</PackageIcon>
     <AssemblyVersion>1.0.0.1</AssemblyVersion>
     <FileVersion>1.0.0.1</FileVersion>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

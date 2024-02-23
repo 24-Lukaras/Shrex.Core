@@ -1,10 +1,21 @@
-﻿namespace Shrex.Filters
+﻿namespace Shrex.Items.Filters
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class FilterCondition<T> : BaseFilterCondition<T>
     {
+        /// <inheritdoc/>
         public required FilterOperation Operation { get; init; }
+
+        /// <summary>
+        /// Indicates if the value used in filter should be surounded with quation marks. Mostly used for string values and date time values.
+        /// </summary>
         public virtual bool UseQuotationMarks { get; init; }
 
+        /// <inheritdoc />
+        /// <exception cref="NotSupportedException">Thrown in case of an operation that isn't applicable</exception>
         public override string GetFilterString()
         {
             string format = Operation switch
@@ -27,6 +38,7 @@
             return string.Format(format, FieldName, GetFormattedValue());
         }
 
+        /// <inheritdoc/>
         public override string GetFormattedValue()
         {
             return UseQuotationMarks ? $"'{Value}'" : $"{Value}";

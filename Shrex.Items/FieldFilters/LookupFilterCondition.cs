@@ -1,9 +1,20 @@
-﻿namespace Shrex.Filters
+﻿namespace Shrex.Items.Filters
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class LookupFilterCondition<T> : BaseFilterCondition<T>
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public required FilterOperation Operation { get; init; }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <exception cref="NotSupportedException"></exception>
         public LookupFilterCondition()
         {
             if (typeof(T) != typeof(string) && typeof(T) != typeof(int))
@@ -12,6 +23,11 @@
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="NotSupportedException"></exception>
         public override string GetFilterString()
         {
             string format = Operation switch
@@ -32,9 +48,13 @@
             return string.Format(format, FieldName, GetFormattedValue());
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public override string GetFormattedValue()
         {
-            return Value.ToString();
+            return Value?.ToString();
         }
     }
 }

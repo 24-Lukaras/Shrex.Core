@@ -1,9 +1,17 @@
-﻿namespace Shrex.Filters
+﻿namespace Shrex.Items.Filters
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class DateTimeFilterCondition : BaseFilterCondition<DateTime>
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public required FilterOperation Operation { get; init; }
 
+        /// <inheritdoc />
+        /// <exception cref="NotSupportedException"></exception>
         public override string GetFilterString()
         {
             string format = Operation switch
@@ -24,6 +32,10 @@
             return string.Format(format, FieldName, GetFormattedValue());
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public override string GetFormattedValue()
         {
             return $"'{Value:O}'";
