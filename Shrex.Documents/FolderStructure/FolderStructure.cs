@@ -5,12 +5,12 @@ namespace Shrex.Documents
 {
     public abstract class FolderStructure : IFolderStructure
     {
-        public abstract RootNode Structure { get; }
+        public abstract FolderStructureBuilder Structure { get; }
 
         public IReadOnlyList<string> GetFolderStructure()
         {
             List<string> folders = new List<string>();
-            foreach (var node in Structure.Nodes)
+            foreach (var node in Structure.Root.Nodes)
             {
                 folders.AddRange(node.GetFolderStructure());
             }

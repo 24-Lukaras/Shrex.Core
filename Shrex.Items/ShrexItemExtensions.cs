@@ -1,6 +1,6 @@
 ﻿using Microsoft.Graph;
 using Microsoft.Graph.Models;
-using Microsoft.Graph.Models.ExternalConnectors;
+using Shrex.Items.Abstractions;
 using Shrex.Items.Filters;
 using Shrex.Items.Mapping;
 
@@ -42,7 +42,7 @@ namespace Shrex.Items
         /// <param name="listId"></param>
         /// <param name="entity"></param>
         /// <returns></returns>
-        public async static Task<ListItem?> CreateListItem<T>(this Shrex shrex, string listId, T entity) where T : IListItemDto
+        public async static Task<ListItem?> CreateListItem<T>(this Shrex shrex, string listId, T? entity) where T : IListItemDto
         {
             return await shrex.CreateListItem(listId, GetData(entity));
         }
@@ -57,7 +57,11 @@ namespace Shrex.Items
         public async static Task<ListItem?> ReadListItem(this Shrex shrex, string listId, string itemId)
         {
             var result = await shrex.Client.Sites[shrex.SiteId].Lists[listId].Items[itemId]
-                .GetAsync();
+                .GetAsync(config =>
+                    {
+                        config.QueryParameters.Expand = ["fields"];
+                    }
+                );
 
             return result;
         }
@@ -94,7 +98,7 @@ namespace Shrex.Items
         /// <param name="itemId"></param>
         /// <param name="entity"></param>
         /// <returns></returns>
-        public async static Task<ListItem?> UpdateListItem<T>(this Shrex shrex, string listId, string itemId, T entity) where T : IListItemDto
+        public async static Task<ListItem?> UpdateListItem<T>(this Shrex shrex, string listId, T entity) where T : IListItemDto
         {
             return await shrex.UpdateListItem(listId, entity.Id, GetData(entity));
         }        
@@ -147,17 +151,17 @@ namespace Shrex.Items
         /// <summary>
         /// Extension method for list item retreival using SharepointExtensions filters.
         /// </summary>
-        /// <param name="shrex"></param>
+        /// <param name="sp"></param>
         /// <param name="listId">Id of sharepoint a list.</param>
         /// <param name="filter">Instance of IFilterString used as a $filter query parameter.</param>
         /// <param name="allowDangerous">Allows to filter non-indexed fields. Might cause issues with large lists.</param>
         /// <param name="expandFields">Indicates if response should also fetch all field values, default true.</param>
         /// <returns>Collection of filtered list items.</returns>
-        public async static Task<IEnumerable<ListItem>> GetListItems(this Shrex shrex, string listId, IFilterString filter, bool allowDangerous = false, bool expandFields = true)
+        public async static Task<IEnumerable<ListItem>> GetListItems(this Shrex sp, string listId, IFilterString filter, bool allowDangerous = false, bool expandFields = true)
         {
             List<ListItem> result = new List<ListItem>();
 
-            var items = await shrex.Client.Sites[shrex.SiteId].Lists[listId]
+            var items = await sp.Client.Sites[sp.SiteId].Lists[listId]
                 .Items
                 .GetAsync(config =>
                 {
@@ -180,13 +184,93 @@ namespace Shrex.Items
 
             result.AddRange(items.Value);
 
+            await sp.GetPagedItems(items, result);
+
+            return result;
+        }
+
+        /// <summary>
+        /// Extension method for list item retreival using SharepointExtensions filters.
+        /// </summary>
+        /// <param name="sp"></param>
+        /// <param name="listId">Id of sharepoint a list.</param>
+        /// <param name="filter">Instance of IFilterString used as a $filter query parameter.</param>
+        /// <param name="expandQuery"></param>
+        /// <param name="allowDangerous">Allows to filter non-indexed fields. Might cause issues with large lists.</param>
+        /// <returns>Collection of filtered list items.</returns>
+        public async static Task<IEnumerable<ListItem>> GetListItems(this Shrex sp, string listId, IFilterString filter, IExpandQuery expandQuery, bool allowDangerous = false)
+        {
+            List<ListItem> result = new List<ListItem>();
+
+            var items = await sp.Client.Sites[sp.SiteId].Lists[listId]
+                .Items
+                .GetAsync(config =>
+                {
+                    config.QueryParameters.Expand = expandQuery.GetExpandQuery();
+                    if (allowDangerous)
+                    {
+                        config.Headers.Add("Prefer", "HonorNonIndexedQueriesWarningMayFailRandomly");
+                    }
+                    config.QueryParameters.Filter = filter.GetFilterString();
+                });
+
+            if (items is null || items.Value is null)
+            {
+                throw new NullReferenceException(nameof(items));
+            }
+
+
+            result.AddRange(items.Value);
+
+            await sp.GetPagedItems(items, result);
+
+            return result;
+        }
+
+        /// <summary>
+        /// Extension method for list item retreival using SharepointExtensions filters.
+        /// </summary>
+        /// <param name="sp"></param>
+        /// <param name="listId">Id of sharepoint a list.</param>
+        /// <param name="expandQuery"></param>
+        /// <param name="allowDangerous">Allows to filter non-indexed fields. Might cause issues with large lists.</param>
+        /// <returns>Collection of filtered list items.</returns>
+        public async static Task<IEnumerable<ListItem>> GetListItems(this Shrex sp, string listId, IExpandQuery expandQuery, bool allowDangerous = false)
+        {
+            List<ListItem> result = new List<ListItem>();
+
+            var items = await sp.Client.Sites[sp.SiteId].Lists[listId]
+                .Items
+                .GetAsync(config =>
+                {
+                    config.QueryParameters.Expand = expandQuery.GetExpandQuery();
+                    if (allowDangerous)
+                    {
+                        config.Headers.Add("Prefer", "HonorNonIndexedQueriesWarningMayFailRandomly");
+                    }
+                });
+
+            if (items is null || items.Value is null)
+            {
+                throw new NullReferenceException(nameof(items));
+            }
+
+            result.AddRange(items.Value);
+
+            await sp.GetPagedItems(items, result);
+
+            return result;
+        }
+
+        private static async Task GetPagedItems(this Shrex sp, ListItemCollectionResponse? items, List<ListItem> result)
+        {
             while (items.OdataNextLink is not null)
             {
                 var pageIterator = PageIterator<ListItem, ListItemCollectionResponse>
                     .CreatePageIterator(
-                        shrex.Client,
+                        sp.Client,
                         items,
-                        (item) => 
+                        (item) =>
                         {
                             result.Add(item);
                             return true;
@@ -196,8 +280,6 @@ namespace Shrex.Items
 
                 await pageIterator.IterateAsync();
             }
-
-            return result;
         }
 
         /// <summary>
@@ -266,6 +348,11 @@ namespace Shrex.Items
             });
         }
 
-
+        public static async Task<List<string>> GetChoices(this Shrex shrex, string listId, string fieldName)
+        {
+            var columns = await shrex.Client.Sites[shrex.SiteId].Lists[listId].Columns.GetAsync();
+            var column = columns.Value.FirstOrDefault(x => fieldName.Equals(x.Name));
+            return column.Choice.Choices ?? throw new ArgumentException("Choice field was not found.");
+        }
     }
 }

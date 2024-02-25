@@ -1,6 +1,8 @@
 ﻿
 using Microsoft.Graph;
 using Microsoft.Graph.Models;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace Shrex.Documents
 {
@@ -11,35 +13,56 @@ namespace Shrex.Documents
     {
         public static async Task CreateFolderStructure(this Shrex sp, IFolderStructure folderStructure, string listOrDriveId, bool isDrive = true)
         {
-            if (isDrive)
+            string driveId = listOrDriveId;
+            if (!isDrive)
             {
-                await sp.CreateFolderStructureDrive(folderStructure,listOrDriveId);
+                var drive = await sp.Client.Sites[sp.SiteId].Lists[listOrDriveId].Drive.GetAsync();
+                driveId = drive?.Id;
             }
-            await sp.CreateFolderStructureList(folderStructure, listOrDriveId);            
-        }
 
-        private static async Task CreateFolderStructureDrive(this Shrex shrex, IFolderStructure folderStucture, string? driveId)
-        {
             ArgumentNullException.ThrowIfNull(driveId, nameof(driveId));
 
-            var drive = shrex.Client.Drives[driveId];
+            var driveRequest = sp.Client.Drives[driveId];
 
-            var folders = folderStucture.GetFolderStructure();
+            var folders = folderStructure.GetFolderStructure();
             foreach (var folder in folders)
             {
                 var folderItem = new DriveItem()
                 {
                     Folder = new Folder(),
                 };
-                await drive.Root.ItemWithPath(folder).PatchAsync(folderItem);
+                await driveRequest.Root.ItemWithPath(folder).PatchAsync(folderItem);
             }
         }
 
-        private static async Task CreateFolderStructureList(this Shrex shrex, IFolderStructure folderStucture, string listId)
+        public static async Task<Stream> DownloadDriveItem(this Shrex sp, string path, string listOrDriveId, bool isDrive = true)
         {
-            var drive = await shrex.Client.Sites[shrex.SiteId].Lists[listId].Drive.GetAsync();
+            string driveId = listOrDriveId;
+            if (!isDrive)
+            {
+                var drive = await sp.Client.Sites[sp.SiteId].Lists[listOrDriveId].Drive.GetAsync();
+                driveId = drive?.Id;
+            }
 
-            await CreateFolderStructureDrive(shrex, folderStucture, drive?.Id);
+            ArgumentNullException.ThrowIfNull(driveId, nameof(driveId));
+
+            var driveRequest = sp.Client.Drives[driveId];
+            return await driveRequest.Root.ItemWithPath(path).Content.GetAsync();
+        }
+
+        public static async Task<IEnumerable<DriveItem>> GetDriveItems(this Shrex sp, string path, string listOrDriveId, bool isDrive = true)
+        {
+            string driveId = listOrDriveId;
+            if (!isDrive)
+            {
+                var drive = await sp.Client.Sites[sp.SiteId].Lists[listOrDriveId].Drive.GetAsync();
+                driveId = drive?.Id;
+            }
+
+            ArgumentNullException.ThrowIfNull(driveId, nameof(driveId));
+
+            var driveRequest = sp.Client.Drives[driveId];
+            return (await driveRequest.Root.ItemWithPath(path).Children.GetAsync()).Value;
         }
     }
 }

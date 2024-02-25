@@ -10,13 +10,13 @@ namespace Shrex.Documents
 
     public class FolderStructureBuilder
     {
-        private readonly RootNode _root;
+        public RootNode Root { get; init; }
         public FolderStructureNode CurrentNode { get; set; }
 
         public FolderStructureBuilder(RootNode root)
         {
-            _root = root;
-            CurrentNode = _root;
+            Root = root;
+            CurrentNode = Root;
         }
 
         public delegate void SubFolderBuilder(FolderStructureBuilder builder);
@@ -39,16 +39,16 @@ namespace Shrex.Documents
             return this;
         }
 
-        public FolderStructureBuilder FolderIf(string folderName, Func<bool> createEntryFunction)
+        public FolderStructureBuilder FolderIf(string folderName, bool createEntry)
         {
-            var folder = new FolderIfNode(createEntryFunction) { Name = folderName };
+            var folder = new FolderIfNode(createEntry) { Name = folderName };
             CurrentNode.Nodes.Add(folder);
             return this;
         }
 
-        public FolderStructureBuilder FolderIf(string folderName, Func<bool> createEntryFunction, SubFolderBuilder subFolderBuilderFunction)
+        public FolderStructureBuilder FolderIf(string folderName, bool createEntry, SubFolderBuilder subFolderBuilderFunction)
         {
-            var folder = new FolderIfNode(createEntryFunction) { Name = folderName };
+            var folder = new FolderIfNode(createEntry) { Name = folderName };
             CurrentNode.Nodes.Add(folder);
 
             var subFolderBuilder = new FolderStructureBuilder(new RootNode() { Name = string.Empty }) { CurrentNode = folder };
@@ -63,11 +63,6 @@ namespace Shrex.Documents
             CurrentNode.Nodes.Add(nav);
             CurrentNode = nav;
             return this;
-        }
-
-        public RootNode Exec()
-        {
-            return _root;
         }
     }
 
@@ -87,15 +82,15 @@ namespace Shrex.Documents
 
     public class FolderIfNode : FolderStructureNode
     {
-        public FolderIfNode(Func<bool> createsEntryFunction)
+        public FolderIfNode(bool createsEntry)
         {
-            _createsEntry = createsEntryFunction;
+            _createsEntry = createsEntry;
         }
 
-        private Func<bool> _createsEntry;
-        public override bool CreatesEntry => _createsEntry.Invoke();
+        private bool _createsEntry;
+        public override bool CreatesEntry => _createsEntry;
 
-        public override bool GoDeeper => _createsEntry.Invoke();
+        public override bool GoDeeper => _createsEntry;
     }
 
     public class NavigateNode : FolderStructureNode
