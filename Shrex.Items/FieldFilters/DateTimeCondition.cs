@@ -1,17 +1,17 @@
 ﻿namespace Shrex.Items.Filters
 {
     /// <summary>
-    /// 
+    /// Class for filtration on "Date and time" columns.
     /// </summary>
-    public class DateTimeFilterCondition : BaseFilterCondition<DateTime>
+    public class DateTimeCondition : BaseFilterCondition<DateTime>
     {
         /// <summary>
-        /// 
+        /// Declares which <see cref="FilterOperation"/> should be applied in the filter query.
         /// </summary>
         public required FilterOperation Operation { get; init; }
 
         /// <inheritdoc />
-        /// <exception cref="NotSupportedException"></exception>
+        /// <exception cref="NotSupportedException">Thrown when unsupported <see cref="FilterOperation"/> is used.</exception>
         public override string GetFilterString()
         {
             string format = Operation switch
@@ -32,10 +32,7 @@
             return string.Format(format, FieldName, GetFormattedValue());
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
+        /// <inheritdoc />
         public override string GetFormattedValue()
         {
             return $"'{Value:O}'";

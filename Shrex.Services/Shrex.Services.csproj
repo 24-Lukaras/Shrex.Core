@@ -4,7 +4,23 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Authors>Lukáš Macek</Authors>
+    <Version>1.0.0</Version>
+    <Description>It stands for SHaRepoint EXtensions... obviously</Description>
+    <PackageIcon>shrex-logo.png</PackageIcon>
+    <Title>Shrex.Services</Title>
+    <RepositoryUrl>https://github.com/24-Lukaras/Shrex.Core</RepositoryUrl>
+    <PackageTags>Graph;SharePoint</PackageTags>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\shrex-logo.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />

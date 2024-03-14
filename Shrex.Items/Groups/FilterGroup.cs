@@ -5,44 +5,33 @@ namespace Shrex.Items
     /// <summary>
     /// Class used for grouping filters.
     /// </summary>
-    public class FilterGroup : IFilterString
+    /// <remarks>
+    /// Default constructor for <see cref="FilterGroup"/>
+    /// </remarks>
+    /// <param name="operation">Logical operation applied to group of filters.</param>
+    /// <param name="filters">Collection of <see cref="IFilterString"/>. Can be instantiated as multiple parameters.</param>
+    public class FilterGroup(FilterGroupOperation operation, params IFilterString[] filters) : IFilterString
     {
         /// <summary>
         /// Logical operation applied to group of filters.
         /// </summary>
-        public readonly FilterGroupOperation Operation;
+        public readonly FilterGroupOperation Operation = operation;
 
         /// <summary>
         /// Collection of <see cref="IFilterString"/>.
         /// </summary>
-        public IEnumerable<IFilterString> Filters;
-
-        /// <summary>
-        /// Default constructor for <see cref="FilterGroup"/>
-        /// </summary>
-        /// <param name="operation">Logical operation applied to group of filters.</param>
-        /// <param name="filters">Collection of <see cref="IFilterString"/>. Can be instantiated as multiple parameters.</param>
-        public FilterGroup(FilterGroupOperation operation, params IFilterString[] filters)
-        {
-            Operation = operation;
-            Filters = filters;
-        }
+        public readonly IEnumerable<IFilterString> Filters = filters;
 
         /// <inheritdoc/>
-        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="NotSupportedException">Thrown when unsupported <see cref="FilterGroupOperation"/> is used.</exception>
         public string GetOperationString()
         {
-            switch (Operation)
+            return Operation switch
             {
-                default:
-                    throw new ArgumentException();
-
-                case FilterGroupOperation.Or:
-                    return "or";
-
-                case FilterGroupOperation.And:
-                    return "and";
-            }
+                FilterGroupOperation.Or => "or",
+                FilterGroupOperation.And => "and",
+                _ => throw new NotSupportedException(),
+            };
         }
 
         /// <inheritdoc/>

@@ -1,21 +1,21 @@
 ﻿namespace Shrex.Items.Filters
 {
     /// <summary>
-    /// 
+    /// Class for filtration on "Lookup" columns. Provide lookup id in the Value property.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public class LookupFilterCondition<T> : BaseFilterCondition<T>
+    /// <typeparam name="T">Type of filtered value. Either <see cref="int"/> or <see cref="string"/>.</typeparam>
+    public class LookupCondition<T> : BaseFilterCondition<T>
     {
         /// <summary>
-        /// 
+        /// Declares which <see cref="FilterOperation"/> should be applied in the filter query.
         /// </summary>
         public required FilterOperation Operation { get; init; }
 
         /// <summary>
-        /// 
+        /// Class for filtration on "Lookup" columns. Provide lookup id in the Value property.
         /// </summary>
-        /// <exception cref="NotSupportedException"></exception>
-        public LookupFilterCondition()
+        /// <exception cref="NotSupportedException">Thrown when type not suitable for LookupId value is provided.</exception>
+        public LookupCondition()
         {
             if (typeof(T) != typeof(string) && typeof(T) != typeof(int))
             {
@@ -23,11 +23,8 @@
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="NotSupportedException"></exception>
+        /// <inheritdoc/>
+        /// <exception cref="NotSupportedException">Thrown when unsupported <see cref="FilterOperation"/> is used.</exception>
         public override string GetFilterString()
         {
             string format = Operation switch
@@ -46,15 +43,6 @@
             };
 
             return string.Format(format, FieldName, GetFormattedValue());
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public override string GetFormattedValue()
-        {
-            return Value?.ToString();
         }
     }
 }

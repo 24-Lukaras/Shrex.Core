@@ -7,22 +7,14 @@ namespace Shrex.Items.Mapping
     /// <summary>
     /// 
     /// </summary>
-    public class DynamicListItemMapper
+    /// <remarks>
+    /// 
+    /// </remarks>
+    /// <param name="type"></param>
+    public class DynamicListItemMapper(Type type)
     {
-        private Type _type;
-        private PropertyInfo[] _properties;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="shrex"></param>
-        /// <param name="listId"></param>
-        /// <param name="type"></param>
-        public DynamicListItemMapper(Shrex shrex, string listId, Type type)
-        {
-            _type = type;
-            _properties = type.GetProperties();
-        }
+        private readonly Type _type = type;
+        private readonly PropertyInfo[] _properties = type.GetProperties();
 
         /// <summary>
         /// 

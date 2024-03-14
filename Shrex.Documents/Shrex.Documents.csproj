@@ -8,6 +8,11 @@
     <Title>Shrex.Documents</Title>
     <PackageIcon>shrex-logo.png</PackageIcon>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <Version>1.0.0</Version>
+    <Authors>Lukáš Macek</Authors>
+    <Description>It stands for SHaRepoint EXtensions... obviously</Description>
+    <RepositoryUrl>https://github.com/24-Lukaras/Shrex.Core</RepositoryUrl>
+    <PackageTags>Graph;SharePoint</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,11 +23,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Shrex.Base\Shrex.Base.csproj" />
+    <PackageReference Include="Microsoft.Graph" Version="5.41.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Graph" Version="5.41.0" />
+    <ProjectReference Include="..\Shrex.Base\Shrex.Base.csproj" />
   </ItemGroup>
 
 </Project>
